@@ -7,9 +7,19 @@ on:
     branches:
       - main
       - develop
+env:
+  PROJECT_ID: prd-morn-d # あなたのGoogle CloudプロジェクトIDに置き換えてください
+  SERVICE_ACCOUNT_EMAIL: deploy-to-firebase-prd@prd-morn-d.iam.gserviceaccount.com # あなたのサービスアカウントのメールアドレスに置き換えてください
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
+    # GitHub ActionsのJobがOIDCトークンを発行することを許可する
+    permissions:
+      contents: 'read' # コードをチェックアウトするため
+      id-token: 'write' # OIDCトークンを生成するため (これがないと認証が失敗します)
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,20 +27,31 @@ jobs:
       - name: Install dependencies & build
         run: npm ci && npm run build
       
-      - name: deploy to prd 
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate to Google Cloud for Prd
         if: github.ref == 'refs/heads/main' 
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRD_MORN_D }}
-          channelId: live
-          projectId: prd-morn-d
+          # ワークロードアイデンティティ連携を使用する設定
+          # GCPのサービスアカウントのメールアドレスを指定
+          workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider' # あなたのワークロードIDプールとプロバイダのパスに置き換えてください
+          service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Deploy to Firebase Hosting
+        if: github.ref == 'refs/heads/main' 
+        # `google-github-actions/auth@v2`が認証情報を環境変数として設定してくれるため、
+        # firebase-toolsは追加の設定なしに自動的に認証されます。
+        run: firebase deploy --only hosting --project ${{ env.PROJECT_ID }} # プロジェクトIDは環境変数から取得
+
+      #- name: deploy to prd 
+      #  uses: FirebaseExtended/action-hosting-deploy@v0
+      #  if: github.ref == 'refs/heads/main' 
+      #  with:
+      #    repoToken: ${{ secrets.GITHUB_TOKEN }}
+      #    firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRD_MORN_D }}
+      #    channelId: live
+      #    projectId: prd-morn-d
     
-      - name: deploy to develop
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        if: github.ref == 'refs/heads/develop' 
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV_MORN_D }}
-          channelId: live
-          projectId: dev-morn-d
