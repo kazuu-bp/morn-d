@@ -8,7 +8,7 @@ on:
       - main
       - develop
 env:
-  PROJECT_ID: prd-morn-d # あなたのGoogle CloudプロジェクトIDに置き換えてください
+  PROJECT_ID: 643891213580 # あなたのGoogle CloudプロジェクトIDに置き換えてください
   SERVICE_ACCOUNT_EMAIL: deploy-to-firebase-prd@prd-morn-d.iam.gserviceaccount.com # あなたのサービスアカウントのメールアドレスに置き換えてください
 
 jobs:
@@ -37,7 +37,8 @@ jobs:
         with:
           # ワークロードアイデンティティ連携を使用する設定
           # GCPのサービスアカウントのメールアドレスを指定
-          workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider' # あなたのワークロードIDプールとプロバイダのパスに置き換えてください
+          workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/deploy-firebase-prd-pool/providers/firebase-prd-provider'
+          # あなたのワークロードIDプールとプロバイダのパスに置き換えてください
           service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
 
       - name: Deploy to Firebase Hosting
