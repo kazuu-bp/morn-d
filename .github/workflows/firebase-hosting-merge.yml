@@ -51,5 +51,9 @@ jobs:
       - name: Deploy to Firebase Hosting
         if: github.ref == 'refs/heads/main' 
         # `google-github-actions/auth@v2`が認証情報を環境変数として設定してくれるため、
-        # firebase-toolsは追加の設定なしに自動的に認証されます。
-        run: firebase deploy --only hosting,functions --project ${{ env.PROJECT_ID }} # プロジェクトIDは環境変数から取得
+        # firebase-toolsは追加の設定なしに自動的に認証されます
+        # --force: Firebase CLIがクリーンアップポリシーの設定を強制的に試みます
+        # Firebase Functionsは、デプロイ時に関数のソースコードなどをCloud Storageバケットにアップロードします。
+        # このバケットは通常、デプロイ時に自動的に作成されます。
+        # しかし、このバケット内の古いビルド済み成果物がたまり続けると、ストレージコストが増加したり、管理が煩雑になったりする可能性があります。
+        run: firebase deploy --only hosting,functions --force --project ${{ env.PROJECT_ID }} # プロジェクトIDは環境変数から取得
