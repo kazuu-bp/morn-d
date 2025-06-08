@@ -57,7 +57,8 @@ jobs:
             --json)
           echo $OUTPUT
           PREVIEW_URL=$(echo "$output" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
-          echo "::set-output name=preview_url::$PREVIEW_URL"
+          echo $PREVIEW_URL
+          echo "$PREVIEW_URL" >> $PREVIEW_URL
 
       # PRにプレビューURLをコメントする
       - name: Add preview URL to PR comment
@@ -66,5 +67,5 @@ jobs:
         with:
           header: 'firebase-preview'
           message: |
-            🚀 Live Preview available at: [${{ steps.deploy.outputs.preview_url }}](${{ steps.deploy.outputs.preview_url }})
+            🚀 Live Preview available at: [${{ env.PREVIEW_URL }}](${{ env.PREVIEW_URL }})
           append: false
