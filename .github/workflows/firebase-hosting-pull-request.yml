@@ -49,7 +49,7 @@ jobs:
             --expires 1d \
             --json)
           echo $DEPLOY_RESULT
-          echo "deploy_result=$(DEPLOY_RESULT)" >> $GITHUB_OUTPUT
+          echo "deploy_result=$DEPLOY_RESULT" >> $GITHUB_OUTPUT
 
       # PRにプレビューURLをコメントする
       - name: Add preview URL to PR comment
