@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write' # OIDC認証のために必須
-      pull-requests: write # PRコメント投稿のために必要
+      pull-requests: 'write' # PRコメント投稿のために必要
 
     steps:
       - name: Checkout code
@@ -40,25 +40,14 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      # firebase hosting:channel:deployからURLを抽出するのに必要
-      #- name: install tree and jq
-      #  run: |
-      #    apt update
-      #    apt install -y tree jq
-
       # Firebase CLI を直接実行してデプロイ
       - name: Deploy to Firebase Hosting Preview Channel
         id: deploy
         run: |
-          OUTPUT=$(firebase hosting:channel:deploy \
-          ${{ github.event.pull_request.head.ref }} \
+          firebase hosting:channel:deploy ${{ github.event.pull_request.head.ref }} \
             --project ${{ env.PROJECT_ID }} \
             --expires 1d \
-            --json)
-          echo $OUTPUT
-          PREVIEW_URL=$(echo "$OUTPUT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
-          echo $PREVIEW_URL
-          echo "$PREVIEW_URL" >> $PREVIEW_URL
+            --json
 
       # PRにプレビューURLをコメントする
       - name: Add preview URL to PR comment
@@ -67,5 +56,8 @@ jobs:
         with:
           header: 'firebase-preview'
           message: |
-            🚀 Live Preview available at: [${{ env.PREVIEW_URL }}](${{ env.PREVIEW_URL }})
+            🚀 Live Preview available at: ${{fromJson(steps.deploy.outputs) }}
+            🚀 Live Preview available at: ${{fromJson(steps.deploy.outputs).result }}
+            🚀 Live Preview available at: ${{fromJson(steps.deploy.outputs).result.${{env.PROJECT_NAME}} }}
+            🚀 Live Preview available at: ${{fromJson(steps.deploy.outputs).result.${{env.PROJECT_NAME}}.url }}
           append: false
