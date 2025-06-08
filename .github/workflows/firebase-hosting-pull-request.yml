@@ -9,7 +9,7 @@ on:
 
 env:
   PROJECT_ID: 643891213580
-  PROJECT_NAME: prd-mon-d
+  PROJECT_NAME: prd-morn-d
   SERVICE_ACCOUNT_EMAIL: deploy-to-firebase-prd@prd-morn-d.iam.gserviceaccount.com # サービスアカウントのメールアドレス
 
 jobs:
@@ -51,7 +51,6 @@ jobs:
           echo "Full DEPLOY_RESULT JSON:"
           echo "$DEPLOY_RESULT"
 
-          echo "$DEPLOY_RESULT" | jq -r '."result"'
           DEPLOY_URL=$(echo "$DEPLOY_RESULT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
           
           echo "Extracted DEPLOY_URL: $DEPLOY_URL"
