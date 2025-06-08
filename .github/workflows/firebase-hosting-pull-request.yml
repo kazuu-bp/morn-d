@@ -45,9 +45,9 @@ jobs:
         run: |
           firebase hosting:channel:deploy \
             --project ${{ env.PROJECT_ID }} \
-            --expires 1d \ # プレビューチャンネルの有効期限（例: 7日間）
+            --expires 1d \
             --only hosting \
-            ${{ github.event.pull_request.head.ref }} # PRのブランチ名をチャンネルIDとして利用
+            ${{ github.event.pull_request.head.ref }}
             
         # デプロイ後に生成されるURLを取得し、PRにコメントする
         # これは少し複雑になるため、必要に応じて実装を検討
