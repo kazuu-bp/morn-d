@@ -48,8 +48,13 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --expires 1d \
             --json)
-          echo $DEPLOY_RESULT
-          echo "deploy_result=$DEPLOY_RESULT" >> $GITHUB_OUTPUT
+          echo "Full DEPLOY_RESULT JSON:"
+          echo "$DEPLOY_RESULT"
+
+          DEPLOY_URL=$(echo "$DEPLOY_RESULT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
+          
+          echo "Extracted DEPLOY_URL: $DEPLOY_URL"
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
       # PRにプレビューURLをコメントする
       - name: Add preview URL to PR comment
@@ -58,6 +63,5 @@ jobs:
         with:
           header: 'firebase-preview'
           message: |
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs.deploy_result) }}
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs.deploy_result).result }}
+            🚀 Live Preview available at: ${{ steps.deploy.outputs.deploy_url }}
           append: false
