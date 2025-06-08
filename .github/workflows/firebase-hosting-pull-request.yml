@@ -51,6 +51,7 @@ jobs:
           echo "Full DEPLOY_RESULT JSON:"
           echo "$DEPLOY_RESULT"
 
+          echo "$DEPLOY_RESULT" | jq -r '."result"'
           DEPLOY_URL=$(echo "$DEPLOY_RESULT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
           
           echo "Extracted DEPLOY_URL: $DEPLOY_URL"
