@@ -34,6 +34,9 @@ jobs:
 
       - name: Install dependencies & build frontend
         run: npm ci && npm run build
+      
+      - name: ls for debug
+        run: pwd && ls
 
       # Firebase CLI をインストール
       - name: Install Firebase CLI
