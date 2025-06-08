@@ -47,8 +47,7 @@ jobs:
           firebase hosting:channel:deploy \
           ${{ github.event.pull_request.head.ref }} \
             --project ${{ env.PROJECT_ID }} \
-            --expires 1d \
-            --only hosting
+            --expires 1d
             
         # デプロイ後に生成されるURLを取得し、PRにコメントする
         # これは少し複雑になるため、必要に応じて実装を検討
