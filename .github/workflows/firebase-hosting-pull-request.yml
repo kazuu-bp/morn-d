@@ -56,7 +56,7 @@ jobs:
             --expires 1d \
             --json)
           echo $OUTPUT
-          PREVIEW_URL=$(echo "$output" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
+          PREVIEW_URL=$(echo "$OUTPUT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
           echo $PREVIEW_URL
           echo "$PREVIEW_URL" >> $PREVIEW_URL
 
