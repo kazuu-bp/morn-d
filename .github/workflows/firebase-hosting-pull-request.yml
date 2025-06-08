@@ -53,7 +53,6 @@ jobs:
 
           DEPLOY_URL=$(echo "$DEPLOY_RESULT" | jq -r '."result"."${{ env.PROJECT_NAME }}"."url"')
           
-          echo "Extracted DEPLOY_URL: $DEPLOY_URL"
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
       # PRにプレビューURLをコメントする
@@ -63,5 +62,5 @@ jobs:
         with:
           header: 'firebase-preview'
           message: |
-            🚀 Live Preview available at: ${{ steps.deploy.outputs.deploy_url }}
+            🚀 Live Preview available at: [${{ steps.deploy.outputs.deploy_url }}](${{ steps.deploy.outputs.deploy_url }})
           append: false
