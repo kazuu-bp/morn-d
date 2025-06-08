@@ -58,6 +58,4 @@ jobs:
           message: |
             🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs) }}
             🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs).result }}
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs).result.prd-morn-d }}
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs).result.prd-morn-d.url }}
           append: false
