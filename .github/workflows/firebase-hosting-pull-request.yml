@@ -44,10 +44,12 @@ jobs:
       - name: Deploy to Firebase Hosting Preview Channel
         id: deploy
         run: |
-          firebase hosting:channel:deploy ${{ github.event.pull_request.head.ref }} \
+          DEPLOY_RESULT=$(firebase hosting:channel:deploy ${{ github.event.pull_request.head.ref }} \
             --project ${{ env.PROJECT_ID }} \
             --expires 1d \
-            --json
+            --json)
+          echo $DEPLOY_RESULT
+          echo "deploy_result=$(DEPLOY_RESULT)" >> $GITHUB_OUTPUT
 
       # PRにプレビューURLをコメントする
       - name: Add preview URL to PR comment
@@ -56,6 +58,6 @@ jobs:
         with:
           header: 'firebase-preview'
           message: |
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs) }}
-            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs).result }}
+            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs.deploy_result) }}
+            🚀 Live Preview available at: ${{ fromJson(steps.deploy.outputs.deploy_result).result }}
           append: false
