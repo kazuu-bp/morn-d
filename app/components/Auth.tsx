@@ -65,7 +65,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
     // ユーザーがログインしている場合のUI
     return (
       <div className='justify-end flex mr-2 mt-2'>
-        <div className='justify-start flex mr-2 mt-2'>
+        <div className='justify-start flex mr-2 mt-2 text-gray-800'>
           ようこそ、{auth.currentUser.displayName || auth.currentUser.email}さん！
         </div>
         <Button

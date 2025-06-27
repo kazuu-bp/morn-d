@@ -24,35 +24,34 @@ const Welcome: React.FC = () => {
       {/* Authコンポーネントは、認証UIの表示と認証ロジックを担当 */}
       <Auth onAuthStateChange={handleAuthStateChange} />
       <main className="flex items-center justify-center pt-16 pb-4">
-        <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
+        <div className="flex-1 flex flex-col items-center justify-center gap-16 min-h-0">
           <header className="flex flex-col items-center gap-9 text-5xl">
             Family Dashboard
           </header>
+          {
+            user ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[600px] mx-auto px-2">
+                <Card
+                  linkto="/baby"
+                  icon={<PiBaby />}
+                  label="育児ダッシュボード"
+                  children={undefined} />
+                <Card
+                  linkto="/bus"
+                  icon={<PiBus />}
+                  label="バス時刻表"
+                  children={undefined} />
+                <Card
+                  linkto="/clock"
+                  icon={<PiClock />}
+                  label="とけい"
+                  children={undefined} />
+              </div>
+            ) : null
+          }
         </div>
       </main>
-      {
-        user ? (
-          <div className="justify-center max-w-[300px] w-full space-y-6 px-4">
-            <Card
-              linkto="/baby"
-              icon={<PiBaby />}
-              label="育児ダッシュボード"
-              children={undefined} />
-            <Card
-              linkto="/bus"
-              icon={<PiBus />}
-              label="バス時刻表"
-              children={undefined} />
-            <Card
-              linkto="/clock"
-              icon={<PiClock />}
-              label="とけい"
-              children={undefined} />
-          </div>
-        ) : null
-      }
     </div>);
 };
 
 export default Welcome;
-
