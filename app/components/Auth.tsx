@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { auth } from '../firebase';
-import { GoogleAuthProvider, signInWithPopup, signOut, User } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, type User } from 'firebase/auth';
 import Button from './Button';
 
 interface AuthProps {
@@ -64,8 +64,10 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
   if (auth.currentUser) {
     // ユーザーがログインしている場合のUI
     return (
-      <div className='mr-2 text-right flex flex-row'>
-        <p>ようこそ、{auth.currentUser.displayName || auth.currentUser.email}さん！</p>
+      <div className='justify-end flex mr-2 mt-2'>
+        <div className='justify-start flex mr-2 mt-2'>
+          ようこそ、{auth.currentUser.displayName || auth.currentUser.email}さん！
+        </div>
         <Button
           onClick={signOutWithGoogle}
           title="ログアウト" />
@@ -74,10 +76,12 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
   } else {
     // ユーザーがログインしていない場合のUI
     return (
-      <div className='mr-2 text-right flex flex-row'>
-        <Button
-          onClick={signInWithGoogle}
-          title="Googleでログイン" />
+      <div>
+        <div className='justify-end flex mr-2 mt-2'>
+          <Button
+            onClick={signInWithGoogle}
+            title="Googleでログイン" />
+        </div>
       </div>
     );
   }

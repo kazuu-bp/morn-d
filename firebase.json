@@ -35,12 +35,15 @@
       "port": 5001
     },
     "hosting": {
-      "port": 5000
+      "port": 5099
     },
     "ui": {
       "enabled": true,
       "port": 5002
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    }
   }
 }
