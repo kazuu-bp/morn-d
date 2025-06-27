@@ -50,7 +50,6 @@ jobs:
           echo "VITE_APP_FIREBASE_PROJECT_ID=${{ env.PROJECT_NAME }}" >> .env
           echo "VITE_APP_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_APP_FIREBASE_STORAGE_BUCKET }}" >> .env
           # Viteのビルドを実行 (Viteは自動的に.envを読み込む)
-          cat .env
           npm run build
 
       # Firebase CLI を直接実行してデプロイ
