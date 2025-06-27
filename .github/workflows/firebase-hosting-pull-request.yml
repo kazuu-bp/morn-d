@@ -33,12 +33,24 @@ jobs:
           workload_identity_provider: 'projects/${{ env.PROJECT_ID }}/locations/global/workloadIdentityPools/deploy-firebase-prd-pool/providers/firebase-prd-provider'
           service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
 
-      - name: Install dependencies & build frontend
-        run: npm ci && npm run build
+      - name: Install dependencies
+        run: npm ci
       
       # Firebase CLI をインストール
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
+
+     # GitHub Secretsから取得した環境変数を.envとして生成
+      - name: Build with production environment variables
+        run: |
+          echo "VITE_APP_FIREBASE_API_KEY=${{ secrets.VITE_APP_FIREBASE_API_KEY }}" > .env
+          echo "VITE_APP_FIREBASE_APP_ID=${{ secrets.VITE_APP_FIREBASE_APP_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_APP_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "VITE_APP_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_APP_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_PROJECT_ID=${{ secrets.VITE_APP_FIREBASE_PROJECT_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_APP_FIREBASE_STORAGE_BUCKET }}" >> .env
+          # Viteのビルドを実行 (Viteは自動的に.env.productionを読み込む)
+          npm run build
 
       # Firebase CLI を直接実行してデプロイ
       - name: Deploy to Firebase Hosting Preview Channel
