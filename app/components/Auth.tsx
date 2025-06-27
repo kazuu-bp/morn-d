@@ -40,7 +40,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
       console.log('ログイン成功:', result.user.displayName || result.user.email);
       // ここで特にステートを更新する必要はありません。
       // onAuthStateChanged が自動的に発火し、親に通知します。
-    } catch (error: any) {
+    } catch (error: unknown) {
       // サインイン中にエラーが発生した場合の処理
       console.error('ログインエラー:', error);
       // エラーメッセージをユーザーに表示するなどの処理を追加することもできます
@@ -53,7 +53,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
       await signOut(auth);
       console.log('ログアウトしました');
       // ここでもステート更新は不要です。onAuthStateChanged が自動的に発火します。
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('ログアウトエラー:', error);
     }
   };

@@ -34,18 +34,15 @@ const Welcome: React.FC = () => {
                 <Card
                   linkto="/baby"
                   icon={<PiBaby />}
-                  label="育児ダッシュボード"
-                  children={undefined} />
+                  label="育児ダッシュボード" />
                 <Card
                   linkto="/bus"
                   icon={<PiBus />}
-                  label="バス時刻表"
-                  children={undefined} />
+                  label="バス時刻表" />
                 <Card
                   linkto="/clock"
                   icon={<PiClock />}
-                  label="とけい"
-                  children={undefined} />
+                  label="とけい" />
               </div>
             ) : null
           }
