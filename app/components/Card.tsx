@@ -13,9 +13,9 @@ type Props = {
 
 const Card: React.FC<Props> = (props) => {
   return (
-    <div className='border-orange rounded-lg border p-5 shadow'>
+    <div className='bg-white border-gray-200 rounded-lg border p-5 shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300'>
       <Link to={props.linkto}>
-        <div className='flex justify-start items-center'>
+        <div className='flex justify-start items-center text-gray-800'>
           {props.icon}
           <div className='ml-3'>
             {props.label}

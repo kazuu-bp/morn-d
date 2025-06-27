@@ -22,13 +22,16 @@ jobs:
 
     steps:
       - name: Checkout code
+        if: github.ref == 'refs/heads/main' 
         uses: actions/checkout@v4
 
-      - name: Install dependencies & build
-        run: npm ci && npm run build
+      - name: Install dependencies
+        if: github.ref == 'refs/heads/main' 
+        run: npm ci
         # working-directoryは不要。ルートにpackage.jsonがあるため。
       
       - name: Install Firebase CLI
+        if: github.ref == 'refs/heads/main' 
         run: npm install -g firebase-tools
 
       - name: Authenticate to Google Cloud for Prd
@@ -43,10 +46,24 @@ jobs:
           service_account: ${{ env.SERVICE_ACCOUNT_EMAIL }}
 
       - name: Install Functions dependencies
+        if: github.ref == 'refs/heads/main' 
         run: npm ci
         working-directory: functions/ # Functionsのディレクトリパスに合わせる
         # functionsディレクトリ内で完結するので、最初のnpm ciと競合しない。
         # Functionsのコード自体はデプロイ時にFirebaseがビルドしてくれる。
+     
+        # GitHub Secretsから取得した環境変数を.envとして生成
+      - name: Build with production environment variables
+        if: github.ref == 'refs/heads/main' 
+        run: |
+          echo "VITE_APP_FIREBASE_API_KEY=${{ secrets.VITE_APP_FIREBASE_API_KEY }}" > .env
+          echo "VITE_APP_FIREBASE_APP_ID=${{ secrets.VITE_APP_FIREBASE_APP_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_APP_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "VITE_APP_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_APP_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_PROJECT_ID=${{ secrets.VITE_APP_FIREBASE_PROJECT_ID }}" >> .env
+          echo "VITE_APP_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_APP_FIREBASE_STORAGE_BUCKET }}" >> .env
+          # Viteのビルドを実行 (Viteは自動的に.env.productionを読み込む)
+          npm run build
 
       - name: Deploy to Firebase Hosting
         if: github.ref == 'refs/heads/main' 
