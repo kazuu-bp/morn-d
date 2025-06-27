@@ -2,7 +2,8 @@ import type { Route } from "./+types/home";
 import Welcome from "./welcome";
 
 
-export function meta({ }: Route.MetaArgs) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function meta({ data }: Route.MetaArgs) {
   return [
     { title: "Family Dashboard" },
     { name: "description", content: "Welcome to React Router!" },
