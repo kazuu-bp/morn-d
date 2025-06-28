@@ -40,7 +40,15 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-     # GitHub Secretsから取得した環境変数を.envとして生成
+    # Functionsもbuildまでする
+      - name: Build Functions
+        run: |
+          cd functions
+          npm ci
+          npm run lint
+          npm run build
+    
+    # GitHub Secretsから取得した環境変数を.envとして生成
       - name: Build with production environment variables
         run: |
           echo "VITE_APP_FIREBASE_API_KEY=${{ secrets.VITE_APP_FIREBASE_API_KEY }}" > .env
