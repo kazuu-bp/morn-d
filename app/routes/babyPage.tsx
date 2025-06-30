@@ -1,9 +1,11 @@
 import React from 'react';
 
-export default function Baby() {
+const BabyPage: React.FC = () => {
   return (
     <div>
       <h1>Baby Page</h1>
     </div>
   );
-}
+};
+
+export default BabyPage;

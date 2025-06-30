@@ -1,9 +1,11 @@
 import React from 'react';
 
-export default function Clock() {
+const ClockPage: React.FC = () => {
   return (
     <div>
       <h1>Clock Page</h1>
     </div>
   );
-}
+};
+
+export default ClockPage;

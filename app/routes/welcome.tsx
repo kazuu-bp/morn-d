@@ -1,28 +1,13 @@
 import { PiBaby, PiBus, PiClock } from "react-icons/pi";
 import Card from "../components/Card";
-import type { User } from 'firebase/auth';
-import React, { useState } from 'react';
-import Auth from '../components/Auth';
+import React from 'react';
+import { useUser } from '../contexts/UserContext';
 
 const Welcome: React.FC = () => {
-
-  // Firebase認証の状態を管理するステート
-  // Authコンポーネントから受け取ったユーザー情報 (またはnull) を保持
-  const [user, setUser] = useState<User | null>(null);
-  /**
-   * Authコンポーネントから認証状態が変更されたときに呼び出されるコールバック関数。
-   * この関数を通じて、Appコンポーネントのuserステートが更新されます。
-   * @param currentUser 現在のユーザーオブジェクト (ログインしていればUser型、していなければnull)
-   */
-  const handleAuthStateChange = (currentUser: User | null) => {
-    setUser(currentUser);
-  };
+  const { user } = useUser();
 
   return (
     <div>
-      {/* Authコンポーネントを配置し、認証状態変更時のコールバックを渡す */}
-      {/* Authコンポーネントは、認証UIの表示と認証ロジックを担当 */}
-      <Auth onAuthStateChange={handleAuthStateChange} />
       <main className="flex items-center justify-center pt-16 pb-4">
         <div className="flex-1 flex flex-col items-center justify-center gap-16 min-h-0">
           <header className="flex flex-col items-center gap-9 text-5xl">
@@ -44,7 +29,7 @@ const Welcome: React.FC = () => {
                   icon={<PiClock />}
                   label="とけい" />
               </div>
-            ) : null
+            ) : <p>Please sign in to continue.</p>
           }
         </div>
       </main>
