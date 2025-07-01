@@ -48,7 +48,7 @@ jobs:
 
       - name: Install Functions dependencies
         if: github.ref == 'refs/heads/main' 
-        run: npm ci
+        run: npm ci && npm run build
         working-directory: functions/ # Functionsのディレクトリパスに合わせる
         # functionsディレクトリ内で完結するので、最初のnpm ciと競合しない。
         # Functionsのコード自体はデプロイ時にFirebaseがビルドしてくれる。
