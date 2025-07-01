@@ -75,9 +75,6 @@ jobs:
         # このバケットは通常、デプロイ時に自動的に作成されます。
         # しかし、このバケット内の古いビルド済み成果物がたまり続けると、ストレージコストが増加したり、管理が煩雑になったりする可能性があります。
         run: |
-          ls functions | cat
-          ls functions/lib | cat
           firebase deploy \
-          --only hosting,functions \
           --force \
           --project ${{ env.PROJECT_ID }}
