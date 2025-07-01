@@ -8,7 +8,13 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "baseUrl": ".",
+    "paths": {
+      "morn-d/*": [
+        "../app/types/*"
+      ]
+    }
   },
   "compileOnSave": true,
   "include": [

@@ -3,12 +3,12 @@ import { Link } from 'react-router'
 
 type Props = {
   className?: string;
-  label?: string;
+  label: string;
   sub?: string;
   help?: string;
   linkto: string;
   icon: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const Card: React.FC<Props> = (props) => {
