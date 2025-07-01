@@ -66,6 +66,14 @@ jobs:
           # Viteのビルドを実行 (Viteは自動的に.envを読み込む)
           npm run build
 
+    # Functions deployのためbuild
+      - name: Build Functions
+        run: |
+          cd functions
+          npm ci
+          npm run lint
+          npm run build
+
       - name: Deploy to Firebase Hosting
         if: github.ref == 'refs/heads/main' 
         # `google-github-actions/auth@v2`が認証情報を環境変数として設定してくれるため、
