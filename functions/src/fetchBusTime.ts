@@ -1,46 +1,19 @@
-
-// Functions v2 の HTTPS モジュールをインポート
 import * as functions from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { URLSearchParams } from 'url'; // Node.js の組み込みモジュール
 import * as logger from "firebase-functions/logger";
+import {
+  type BusTimeData,
+  type fetchBusTimeResponseData,
+  type fetchBusTimeRequestData,
+  type BusTimeEntry
+} from 'morn-d/bus';
+
 
 // Firebase Admin SDK の初期化
 admin.initializeApp();
-
-/**
- * バス1便の出発時刻と到着時刻を格納するためのインターフェース
- */
-interface BusTimeEntry {
-  deptTime?: string; // 出発時刻
-  destTime?: string; // 到着時刻
-}
-
-/**
- * _fetchBusTime 関数の戻り値の型
- */
-type BusTimeData = BusTimeEntry[];
-
-/**
- * クライアントからのリクエストデータの型定義
- */
-interface fetchBusTimeRequestData {
-  dept: string; // 出発するバス停の名前
-  dest: string; // 到着するバス停の名前
-}
-
-/**
- * Callable Function のレスポンスデータの型定義
- * クライアント側で result.data で受け取るオブジェクトの型
- */
-interface fetchBusTimeResponseData {
-  status: 'success' | 'error';
-  message: string;
-  busTimeData?: BusTimeData; // 成功時にバス時刻データを含める
-  errorCode?: string; // エラー時にエラーコードを含める (HttpsErrorのcodeに対応)
-}
 
 /**
  * 出発バス停と到着バス停をURLに埋め込み、リクエストを送信し、時刻をスクレイピングします。
