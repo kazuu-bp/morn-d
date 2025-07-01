@@ -70,11 +70,11 @@ jobs:
       - name: Build Functions
         run: |
           cd functions
-          ls -la lib
+          ls -la lib | cat
           npm ci
           npm run lint
           npm run build
-          ls -la lib
+          ls -la lib | cat
 
       - name: Deploy to Firebase Hosting
         if: github.ref == 'refs/heads/main' 
