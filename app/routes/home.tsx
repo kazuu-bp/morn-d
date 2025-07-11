@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import { type User } from 'firebase/auth';
 import { UserProvider } from '../contexts/UserContext';
@@ -16,9 +16,10 @@ export function meta({ data }: Route.MetaArgs) {
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
 
-  const handleAuthStateChange = (currentUser: User | null) => {
+  // useCallback を使って関数をメモ化し、Authコンポーネントの不要な再レンダリングを防ぎます。
+  const handleAuthStateChange = useCallback((currentUser: User | null) => {
     setUser(currentUser);
-  };
+  }, []);
 
   return (
     <UserProvider user={user}>

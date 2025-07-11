@@ -2,18 +2,28 @@ import React, { useEffect } from 'react';
 import { auth } from '../firebase';
 import { GoogleAuthProvider, signInWithPopup, signOut, type User } from 'firebase/auth';
 import Button from './Button';
+import type { Route } from "../+types/root";
+import { Route } from 'react-router';
 
-interface AuthProps {
-  // 認証状態が変更された際に呼び出されるコールバック関数
-  // 現在のユーザー (Userオブジェクト) または null を引数として受け取る
+/*interface AuthProps {
   onAuthStateChange: (user: User | null) => void;
-}
+}*/
 
-const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
-  // Google認証プロバイダのインスタンスを生成
-  // コンポーネントの再レンダリングごとに新しいインスタンスが作られないように、
-  // useStateやuseMemo/useRefで一度だけ生成するか、コンポーネント外に定義するのが一般的です。
-  const provider = new GoogleAuthProvider();
+type AuthProps = {
+  Route: {
+    LoaderArgs: {
+      params: {
+        onAuthStateChange: (user: User | null) => void;
+      }
+    }
+  }
+};
+
+// Google認証プロバイダのインスタンスをコンポーネント外で一度だけ生成します。
+// これにより、再レンダリングのたびに新しいインスタンスが作られるのを防ぎます。
+const provider = new GoogleAuthProvider();
+
+const Auth: React.FC<AuthProps> = ({ params }: Route.LoaderArgs) => {
 
   // コンポーネントがマウントされたとき（初回描画時）に一度だけ実行される
   // Firebaseの認証状態の監視をセットアップ
@@ -28,9 +38,7 @@ const Auth: React.FC<AuthProps> = ({ onAuthStateChange }) => {
     // コンポーネントがアンマウントされるとき（画面から削除されるとき）に実行されるクリーンアップ関数
     // 認証状態の監視を停止し、メモリリークを防ぎます
     return () => unsubscribe();
-  }, [onAuthStateChange]); // 依存配列に onAuthStateChange を含めることで、
-  // onAuthStateChange が変化した場合（通常は起こらないはず）に
-  // エフェクトが再実行されます
+  }, [onAuthStateChange]); // onAuthStateChange が変更された場合にのみエフェクトが再実行されます。
 
   // Googleアカウントでのサインイン処理
   const signInWithGoogle = async () => {
