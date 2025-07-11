@@ -63,6 +63,10 @@ jobs:
           echo "VITE_APP_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_APP_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "VITE_APP_FIREBASE_PROJECT_ID=${{ env.PROJECT_NAME }}" >> .env
           echo "VITE_APP_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_APP_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "VITE_APP_BUS_DEPT1=${{ secrets.VITE_APP_BUS_DEPT1 }}" >> .env
+          echo "VITE_APP_BUS_DEST1=${{ secrets.VITE_APP_BUS_DEST1 }}" >> .env
+          echo "VITE_APP_BUS_DEPT2=${{ secrets.VITE_APP_BUS_DEPT2 }}" >> .env
+          echo "VITE_APP_BUS_DEST2=${{ secrets.VITE_APP_BUS_DEST2 }}" >> .env
           # Viteのビルドを実行 (Viteは自動的に.envを読み込む)
           npm run build
 
@@ -76,6 +80,5 @@ jobs:
         # しかし、このバケット内の古いビルド済み成果物がたまり続けると、ストレージコストが増加したり、管理が煩雑になったりする可能性があります。
         run: |
           firebase deploy \
-          --only hosting,functions \
           --force \
           --project ${{ env.PROJECT_ID }}
