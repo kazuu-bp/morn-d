@@ -1,8 +1,8 @@
 import * as functions from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import * as logger from "firebase-functions/logger";
 import { Request, Response } from 'express'; // Express の Request と Response 型をインポート
-
 // Firebase Admin SDK の初期化は、プロジェクトのエントリーポイント（例: index.ts）で一度だけ行います。
 
 /**
@@ -74,69 +74,84 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
   logger.info('Received fileName:', fileName);
   logger.info('Received content:', content);
 
-  let event: string;
-  let eventTimeStamp: admin.firestore.Timestamp = admin.firestore.Timestamp.now();
-  let note: string;
-
   try {
-    // 4. コンテンツをパースしてイベント情報（時刻、イベント名、メモ）を抽出
-    const timeRegex = /(\d{1,2}:\d{2})/;
-    const timeMatch = content.match(timeRegex);
-
-    let textToParse = content;
-
-    // 時刻がテキストに含まれている場合
-    if (timeMatch) {
-      const timeStr = timeMatch[1];
-      // テキストから時刻部分を削除
-      textToParse = content.replace(timeRegex, '').trim();
-
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      const eventDate = new Date();
-      eventDate.setHours(hours, minutes, 0, 0);
-
-      // パースした時刻が未来の場合（例: 0:10に「23:50」と入力）、前日の日付にする
-      if (eventDate > new Date()) {
-        eventDate.setDate(eventDate.getDate() - 1);
-      }
-      eventTimeStamp = admin.firestore.Timestamp.fromDate(eventDate);
-    }
-
-    // 残りのテキストをイベント名とメモに分割
-    const parts = textToParse.split(/\s+/).filter(p => p);
-    if (parts.length === 0) {
-      logger.error('Invalid request data: Event name is missing.');
+    // 4. コンテンツをパースしてイベント情報を抽出
+    // 4-1. ファイル名から日付を取得
+    const dateMatch = fileName.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+    if (!dateMatch) {
+      logger.error('Invalid fileName format: Date could not be parsed from fileName.', fileName);
       response.status(400).send({
         status: 'error',
-        message: 'イベント名が含まれていません。'
+        message: 'ファイル名から日付を抽出できませんでした。フォーマットは "【ぴよログ】YYYY/M/D.txt" である必要があります。'
+      });
+      return;
+    }
+    const year = parseInt(dateMatch[1], 10);
+    const month = parseInt(dateMatch[2], 10) - 1; // month is 0-indexed in JavaScript
+    const day = parseInt(dateMatch[3], 10);
+
+    // 4-2. コンテンツを行ごとに分割し、イベントを抽出
+    const lines = content.split('\n');
+    const eventsToInsert: object[] = [];
+    const eventRegex = /^(\d{2}:\d{2})\s+(.+)$/;
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      const match = trimmedLine.match(eventRegex);
+
+      if (match) {
+        const timeStr = match[1];
+        const eventText = match[2].trim();
+
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        // ファイル名から取得した年月日と、行から取得した時刻でDateオブジェクトを作成
+        const eventDate = new Date(year, month, day, hours, minutes);
+        const eventTimeStamp = Timestamp.fromDate(eventDate);
+
+        const parts = eventText.split(/\s+/).filter(p => p);
+        const event = parts[0];
+        const note = parts.slice(1).join(' ');
+
+        eventsToInsert.push({
+          event: event,
+          timestamp: eventTimeStamp,
+          note: note,
+          fileName: fileName,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      }
+    }
+
+    if (eventsToInsert.length === 0) {
+      logger.warn('No events found to insert from the content.');
+      response.status(200).send({
+        status: 'success',
+        message: 'コンテンツから登録対象のイベントが見つかりませんでした。',
+        docIds: [],
       });
       return;
     }
 
-    event = parts[0];
-    note = parts.slice(1).join(' ');
-
-    // 5. Firestoreにデータを保存
-    // ユーザーごとのデータを保存するために、'users/{uid}/babyEvents' のような構造を想定
+    // 5. Firestoreにデータをバッチ保存
     const db = admin.firestore();
+    const batch = db.batch();
     const babyEventRef = db.collection('users').doc('test').collection('babyEvents');
+    const docIds: string[] = [];
 
-    const newEventData = {
-      event: event,
-      timestamp: eventTimeStamp,
-      note: note,
-      fileName: fileName, // 新しく追加されたfileName
-      createdAt: admin.firestore.FieldValue.serverTimestamp(), // サーバー側での記録日時
-    };
+    eventsToInsert.forEach(eventData => {
+      const docRef = babyEventRef.doc(); // 自動IDで新しいドキュメント参照を作成
+      batch.set(docRef, eventData);
+      docIds.push(docRef.id);
+    });
 
-    const docRef = await babyEventRef.add(newEventData);
-    logger.info(`Successfully inserted baby event with ID: ${docRef.id} for user: test`);
+    await batch.commit();
+    logger.info(`Successfully inserted ${eventsToInsert.length} baby events for user: test`);
 
     // 6. 成功レスポンスを返す
     response.status(200).send({
       status: 'success',
-      message: '育児イベントを正常に登録しました。',
-      docId: docRef.id,
+      message: `育児イベントを${eventsToInsert.length}件正常に登録しました。`,
+      docIds: docIds,
     });
 
   } catch (error) {
