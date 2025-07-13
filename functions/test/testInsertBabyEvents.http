@@ -1,0 +1,13 @@
+// cd functions && npm run serve 
+// //コード変更時に都度実行が必要。firestoreも必要なので不足。
+// npm run build && firebase emulators:start
+// // が必要
+// Ctrl + Option + R
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  "http://localhost:5001/dev-morn-d/us-central1/insertBabyEventsFunction" \
+  -d '{
+        "fileName": "test_event.txt",
+        "content": "10:30 ミルク 120ml"
+      }'
