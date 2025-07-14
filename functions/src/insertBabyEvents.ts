@@ -4,7 +4,13 @@ import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import * as logger from "firebase-functions/logger";
 import { Request, Response } from 'express'; // Express の Request と Response 型をインポート
 // Firebase Admin SDK の初期化は、プロジェクトのエントリーポイント（例: index.ts）で一度だけ行います。
-
+interface BabyEvent {
+  event: string;
+  timestamp: Timestamp;
+  note: string;
+  createdAt?: FieldValue;
+  updatedAt?: FieldValue;
+}
 /**
  * HTTP Function: クライアントから送信されたJSONデータをパースし、
  * Firestore の 'babyEvents' コレクションに保存します。
@@ -92,14 +98,6 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
 
     // 4-2. コンテンツを行ごとに分割し、イベントを抽出
     const lines = content.split('\n');
-    interface BabyEvent {
-      event: string;
-      timestamp: Timestamp;
-      note: string;
-      fileName: string;
-      createdAt?: FieldValue;
-      updatedAt?: FieldValue;
-    }
     const eventsToInsert: BabyEvent[] = [];
     const eventRegex = /^(\d{2}:\d{2})\s+(.+)$/;
 
@@ -112,8 +110,11 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
         const eventText = match[2].trim();
 
         const [hours, minutes] = timeStr.split(':').map(Number);
-        // ファイル名から取得した年月日と、行から取得した時刻でDateオブジェクトを作成
-        const eventDate = new Date(year, month, day, hours, minutes);
+        // Date.UTC を使用してUTC時刻としてDateオブジェクトを作成し、JSTのオフセットを加える
+        const eventDate = new Date(Date.UTC(year, month, day, hours, minutes));
+        // JSTはUTC+9なので、UTCのDateオブジェクトに9時間を加えることで、
+        // Firestoreに保存されるUTCタイムスタンプがJSTの時刻を正確に表すようにする
+        eventDate.setUTCHours(eventDate.getUTCHours() - 9);
         const eventTimeStamp = Timestamp.fromDate(eventDate);
 
         const parts = eventText.split(/\s+/).filter(p => p);
@@ -124,7 +125,6 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
           event: event,
           timestamp: eventTimeStamp,
           note: note,
-          fileName: fileName,
           // createdAt はFirestoreへの書き込み時に設定
         });
       }
@@ -143,7 +143,7 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
     // 5. Firestoreにデータをバッチ保存
     const db = admin.firestore();
     const batch = db.batch();
-    const babyEventRef = db.collection('users').doc('test').collection('babyEvents');
+    const babyEventRef = db.collection('babyEvents');
     const docIds: string[] = [];
     let insertedCount = 0;
     let updatedCount = 0;
@@ -176,27 +176,36 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
           logger.info(`Updating note for event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()}`);
         }
       } else {
-        // 既存のイベントが見つからなかった場合、新規挿入
-        const docRef = babyEventRef.doc(); // 自動IDで新しいドキュメント参照を作成
-        batch.set(docRef, {
+        const date = eventData.timestamp.toDate();
+        date.setHours(date.getHours() + 9);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+
+        // YYYYMMDDHHmm + ランダムな文字列でカスタムIDを生成
+        const customDocId = `${year}${month}${day}${hours}${minutes}${Math.random().toString(36).substring(2, 8)}`;
+
+        batch.set(babyEventRef.doc(customDocId), {
           ...eventData,
           createdAt: FieldValue.serverTimestamp(), // 新規作成日時を追加
         });
-        docIds.push(docRef.id);
+        docIds.push(customDocId);
         insertedCount++;
-        logger.info(`Inserting new event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()}`);
+        logger.info(`Inserting new event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()} with ID: ${customDocId} (Generated at: ${date.toISOString()})`);
       }
     }
 
     await batch.commit();
-    logger.info(`Successfully processed baby events for user: test. Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`);
+    logger.info(`Successfully processed baby events. Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`);
     logger.info(`Total documents processed: ${insertedCount + updatedCount}`);
     logger.info(`Total unique document IDs: ${docIds.length}`);
 
     // 6. 成功レスポンスを返す
     response.status(200).send({
       status: 'success',
-      message: `育児イベントを${eventsToInsert.length}件正常に登録しました。`,
+      message: `Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`,
       docIds: docIds,
     });
 
