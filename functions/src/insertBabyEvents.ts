@@ -92,7 +92,15 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
 
     // 4-2. コンテンツを行ごとに分割し、イベントを抽出
     const lines = content.split('\n');
-    const eventsToInsert: object[] = [];
+    interface BabyEvent {
+      event: string;
+      timestamp: Timestamp;
+      note: string;
+      fileName: string;
+      createdAt?: FieldValue;
+      updatedAt?: FieldValue;
+    }
+    const eventsToInsert: BabyEvent[] = [];
     const eventRegex = /^(\d{2}:\d{2})\s+(.+)$/;
 
     for (const line of lines) {
@@ -117,7 +125,7 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
           timestamp: eventTimeStamp,
           note: note,
           fileName: fileName,
-          createdAt: FieldValue.serverTimestamp(),
+          // createdAt はFirestoreへの書き込み時に設定
         });
       }
     }
@@ -137,15 +145,53 @@ const insertBabyEvents = functions.onRequest({ cors: true }, async (request: Req
     const batch = db.batch();
     const babyEventRef = db.collection('users').doc('test').collection('babyEvents');
     const docIds: string[] = [];
+    let insertedCount = 0;
+    let updatedCount = 0;
+    let skippedCount = 0;
 
-    eventsToInsert.forEach(eventData => {
-      const docRef = babyEventRef.doc(); // 自動IDで新しいドキュメント参照を作成
-      batch.set(docRef, eventData);
-      docIds.push(docRef.id);
-    });
+    for (const eventData of eventsToInsert) {
+      const existingEventsSnapshot = await babyEventRef
+        .where('event', '==', eventData.event)
+        .where('timestamp', '==', eventData.timestamp)
+        .limit(1)
+        .get();
+
+      if (!existingEventsSnapshot.empty) {
+        // 既存のイベントが見つかった場合
+        const existingDoc = existingEventsSnapshot.docs[0];
+        const existingData = existingDoc.data();
+
+        if (existingData.note === eventData.note) {
+          // event, timestamp, note が全て同じ場合はスキップ
+          logger.info(`Skipping duplicate event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()}`);
+          skippedCount++;
+        } else {
+          // event, timestamp が同じで note が異なる場合は note を更新
+          batch.update(existingDoc.ref, {
+            note: eventData.note,
+            updatedAt: FieldValue.serverTimestamp(), // 更新日時を追加
+          });
+          docIds.push(existingDoc.id);
+          updatedCount++;
+          logger.info(`Updating note for event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()}`);
+        }
+      } else {
+        // 既存のイベントが見つからなかった場合、新規挿入
+        const docRef = babyEventRef.doc(); // 自動IDで新しいドキュメント参照を作成
+        batch.set(docRef, {
+          ...eventData,
+          createdAt: FieldValue.serverTimestamp(), // 新規作成日時を追加
+        });
+        docIds.push(docRef.id);
+        insertedCount++;
+        logger.info(`Inserting new event: ${eventData.event} at ${eventData.timestamp.toDate().toISOString()}`);
+      }
+    }
 
     await batch.commit();
-    logger.info(`Successfully inserted ${eventsToInsert.length} baby events for user: test`);
+    logger.info(`Successfully processed baby events for user: test. Inserted: ${insertedCount}, Updated: ${updatedCount}, Skipped: ${skippedCount}`);
+    logger.info(`Total documents processed: ${insertedCount + updatedCount}`);
+    logger.info(`Total unique document IDs: ${docIds.length}`);
 
     // 6. 成功レスポンスを返す
     response.status(200).send({
