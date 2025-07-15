@@ -103,7 +103,7 @@ const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap
             <MdAccessTimeFilled className="text-lg text-gray-400 mr-2" />
             <span className="font-medium">記録日時:</span>
             <span className="ml-2 text-gray-700">
-              {format(timestampDate, 'yyyy年M月d日 HH:mm', { locale: ja })} (JST)
+              {format(timestampDate, 'M月d日 HH:mm', { locale: ja })} (JST)
             </span>
           </div>
         )}
@@ -112,7 +112,7 @@ const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap
             <FaCalendarAlt className="text-lg text-gray-400 mr-2" />
             <span className="font-medium">作成日時:</span>
             <span className="ml-2 text-gray-700">
-              {format(createdAtDate, 'yyyy年M月d日 HH:mm:ss', { locale: ja })} (JST)
+              {format(createdAtDate, 'M月d日 HH:mm:ss', { locale: ja })} (JST)
             </span>
           </div>
         )}
