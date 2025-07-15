@@ -1,6 +1,6 @@
 // テストコマンド
 // npm run serve
-// node testBusTime.js
+// node test/testBusTime.js
 
 const { initializeApp } = require('firebase/app');
 const { getFunctions, httpsCallable, connectFunctionsEmulator } = require('firebase/functions');

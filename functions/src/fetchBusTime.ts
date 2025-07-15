@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions/v2/https';
-import * as admin from 'firebase-admin';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { URLSearchParams } from 'url'; // Node.js の組み込みモジュール
@@ -13,7 +12,6 @@ import {
 
 
 // Firebase Admin SDK の初期化
-admin.initializeApp();
 
 /**
  * 出発バス停と到着バス停をURLに埋め込み、リクエストを送信し、時刻をスクレイピングします。
