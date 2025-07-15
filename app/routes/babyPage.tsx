@@ -20,7 +20,7 @@ const BabyPage: React.FC = () => {
       />
       <BabyEventCard
         title="母乳"
-        eventName="母乳s"
+        eventName="母乳"
         iconMap={ICONMAP}
       />
     </div>
