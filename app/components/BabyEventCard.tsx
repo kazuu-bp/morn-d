@@ -81,7 +81,7 @@ const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap
 
         {/* イベントタイプ */}
         <div className="flex items-center mb-3 text-gray-700">
-          <GiKidneys className="text-xl text-gray-500 mr-3" />
+          <EventIcon className="text-xl text-gray-500 mr-3" />
           <span className="font-semibold">イベント:</span>
           <span className="ml-2 text-lg font-medium text-purple-700">{data.event}</span>
         </div>
