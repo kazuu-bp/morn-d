@@ -1,11 +1,17 @@
 {
   "indexes": [
     {
-      "collectionGroup": "events",
+      "collectionGroup": "babyEvents",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "event", "order": "ASCENDING" },
-        { "fieldPath": "eventTimestamp", "order": "ASCENDING" }
+        {
+          "fieldPath": "event",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
       ]
     }
   ],

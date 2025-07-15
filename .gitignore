@@ -7,3 +7,5 @@
 
 .env
 functions/firestore-debug.log
+firebase-debug.log
+firestore-debug.log
