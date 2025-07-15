@@ -76,15 +76,17 @@ jobs:
           firebase deploy --only functions,hosting \
           --force \
           --project ${{ env.PROJECT_ID }}
-      
+
+      - name: Deploy Firestore Indexes
+        if: github.ref == 'refs/heads/main' 
+        run: |
+          firebase deploy --only firestore:indexes \
+          --project ${{ env.PROJECT_ID }}
+
       - name: Deploy Firestore Rules
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:rules \
           --project ${{ env.PROJECT_ID }}
       
-      - name: Deploy Firestore Indexes
-        if: github.ref == 'refs/heads/main' 
-        run: |
-          firebase deploy --only firestore:indexes \
-          --project ${{ env.PROJECT_ID }}
+
