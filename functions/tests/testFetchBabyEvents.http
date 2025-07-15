@@ -1,0 +1,70 @@
+# fetchBabyEvents.http
+#
+# Firebase Functions Emulator で `fetchBabyEventsFunction` をテストするためのファイルです。
+# VS Code の REST Client 拡張機能で実行できます。
+#
+# 使い方:
+# 1. `firebase emulators:start` でエミュレータを起動します。
+# 2. 下記の `@baseUrl` の `<YOUR_PROJECT_ID>` をご自身のFirebaseプロジェクトIDに置き換えます。
+# 3. 下記の `@authToken` の `<DUMMY_ID_TOKEN>` をFirebase Auth Emulatorで取得したIDトークンに置き換えます。
+# 4. 各リクエストの上の `###` をクリックしてリクエストを送信します。
+
+# Firebase Functions Emulator のベースURL
+@baseUrl = http://localhost:5001/dev-morn-d/us-central1
+
+# Firebase Auth Emulator で取得したダミーのIDトークン
+# 認証をテストしない場合は、この行と Authorization ヘッダーをコメントアウトしてください。
+@authToken = Bearer <DUMMY_ID_TOKEN>
+
+###
+# Test Case 1: 正常系 - "授乳" イベントを最新2件取得
+# 期待するレスポンス: 200 OK, status: "success", data配列に2件のレコード
+POST {{baseUrl}}/fetchBabyEventsFunction
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "data": {
+    "eventName": "母乳",
+    "limit": 2
+  }
+}
+
+###
+# Test Case 2: 正常系 - "おむつ" イベントを limit 指定なしで取得 (デフォルト10件)
+# 期待するレスポンス: 200 OK, status: "success", data配列に最大10件のレコード
+POST {{baseUrl}}/fetchBabyEventsFunction
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "data": {
+    "eventName": "ミルク"
+  }
+}
+
+###
+# Test Case 3: 異常系 - eventName がない
+# 期待するレスポンス: 400 Bad Request, error.message に "eventNameは必須の文字列です。"
+POST {{baseUrl}}/fetchBabyEventsFunction
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "data": {
+    "limit": 5
+  }
+}
+
+###
+# Test Case 4: 異常系 - 認証なし
+# 期待するレスポンス: 401 Unauthorized, error.message に "認証が必要です。"
+POST {{baseUrl}}/fetchBabyEventsFunction
+Content-Type: application/json
+
+{
+  "data": {
+    "eventName": "授乳",
+    "limit": 1
+  }
+}
