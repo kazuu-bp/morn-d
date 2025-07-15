@@ -7,7 +7,7 @@ import { FaPersonBreastfeeding } from "react-icons/fa6";
 const ICONMAP = {
   "ミルク": GiBabyBottle,
   "うんち": FaPoop,
-  "授乳": FaPersonBreastfeeding
+  "母乳": FaPersonBreastfeeding
 }
 
 const BabyPage: React.FC = () => {
@@ -19,8 +19,8 @@ const BabyPage: React.FC = () => {
         iconMap={ICONMAP}
       />
       <BabyEventCard
-        title="授乳"
-        eventName="授乳"
+        title="母乳"
+        eventName="母乳s"
         iconMap={ICONMAP}
       />
     </div>
