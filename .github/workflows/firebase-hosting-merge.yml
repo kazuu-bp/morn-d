@@ -70,15 +70,21 @@ jobs:
           # Viteのビルドを実行 (Viteは自動的に.envを読み込む)
           npm run build
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy to Firebase (Functions and Hosting)
         if: github.ref == 'refs/heads/main' 
-        # `google-github-actions/auth@v2`が認証情報を環境変数として設定してくれるため、
-        # firebase-toolsは追加の設定なしに自動的に認証されます
-        # --force: Firebase CLIがクリーンアップポリシーの設定を強制的に試みます
-        # Firebase Functionsは、デプロイ時に関数のソースコードなどをCloud Storageバケットにアップロードします。
-        # このバケットは通常、デプロイ時に自動的に作成されます。
-        # しかし、このバケット内の古いビルド済み成果物がたまり続けると、ストレージコストが増加したり、管理が煩雑になったりする可能性があります。
         run: |
-          firebase deploy \
+          firebase deploy --only functions,hosting \
           --force \
+          --project ${{ env.PROJECT_ID }}
+      
+      - name: Deploy Firestore Rules
+        if: github.ref == 'refs/heads/main' 
+        run: |
+          firebase deploy --only firestore:rules \
+          --project ${{ env.PROJECT_ID }}
+      
+      - name: Deploy Firestore Indexes
+        if: github.ref == 'refs/heads/main' 
+        run: |
+          firebase deploy --only firestore:indexes \
           --project ${{ env.PROJECT_ID }}
