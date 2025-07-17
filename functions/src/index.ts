@@ -12,6 +12,7 @@ import * as admin from 'firebase-admin';
 import fetchBusTime from "./fetchBusTime";
 import insertBabyEvents from "./insertBabyEvents";
 import { fetchBabyEvents } from './fetchBabyEvent';
+import { predictMilkFunction } from './predictMilkFunction';
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -22,5 +23,4 @@ admin.initializeApp();
 export const fetchBusTimeFunction = fetchBusTime;
 export const insertBabyEventsFunction = insertBabyEvents;
 export const fetchBabyEventsFunction = fetchBabyEvents;
-
-//
+export { predictMilkFunction };

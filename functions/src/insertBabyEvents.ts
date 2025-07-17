@@ -2,15 +2,9 @@ import * as functions from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import * as logger from "firebase-functions/logger";
-import { Request, Response } from 'express'; // Express の Request と Response 型をインポート
+import type { Request, Response } from 'express'; // Express の Request と Response 型をインポート
+import type { BabyEvent } from './types/babyEvent';
 // Firebase Admin SDK の初期化は、プロジェクトのエントリーポイント（例: index.ts）で一度だけ行います。
-interface BabyEvent {
-  event: string;
-  timestamp: Timestamp;
-  note: string;
-  createdAt?: FieldValue;
-  updatedAt?: FieldValue;
-}
 /**
  * HTTP Function: クライアントから送信されたJSONデータをパースし、
  * Firestore の 'babyEvents' コレクションに保存します。

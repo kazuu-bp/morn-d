@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as admin from 'firebase-admin';
 import * as logger from 'firebase-functions/logger';
+import type { BabyEventRecord } from './types/babyEvent';
 
 /**
  * イベント名と件数を指定して、最新のイベントレコードを取得するHTTP Callable関数
@@ -53,14 +54,7 @@ export const fetchBabyEvents = onCall(async (request) => {
       .limit(limit) // 指定された件数に制限
       .get();
 
-    interface BabyEventRecord {
-      id: string;
-      event: string;
-      note?: string;
-      timestamp: admin.firestore.Timestamp;
-      createdAt?: admin.firestore.Timestamp;
-      [key: string]: unknown; // 他の動的フィールドに対応
-    }
+
 
     const records: BabyEventRecord[] = [];
     querySnapshot.forEach(doc => {

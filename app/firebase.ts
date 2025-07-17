@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
 // VITEから環境変数を読み込む
 const firebaseConfig = {
@@ -30,13 +31,15 @@ const app = initializeApp(firebaseConfig);
 // 各サービスのインスタンスを取得
 const auth = getAuth(app);
 const functions = getFunctions(app);
+const db = getFirestore(app);
 
 // 開発環境の場合のみエミュレータに接続
 if (import.meta.env.DEV) {
   console.log("Connecting to Firebase emulators...");
   connectFunctionsEmulator(functions, 'localhost', 5001); // Functionsエミュレータ
   connectAuthEmulator(auth, 'http://localhost:9099');     // Authエミュレータ
+  connectFirestoreEmulator(db, 'localhost', 8080);        // Firestoreエミュレータ
 }
 
 // 初期化済みの各サービスをエクスポート
-export { app, auth, functions };
+export { app, auth, functions, db };

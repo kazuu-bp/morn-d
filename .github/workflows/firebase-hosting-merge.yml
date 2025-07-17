@@ -81,7 +81,7 @@ jobs:
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:indexes \
-          --project ${{ env.PROJECT_NAME }} --debug
+          --project ${{ env.PROJECT_NAME }}
 
       - name: Deploy Firestore Rules
         if: github.ref == 'refs/heads/main' 
