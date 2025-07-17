@@ -1,5 +1,4 @@
-// src/hooks/useBabyEvent.ts
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
 
@@ -13,11 +12,10 @@ interface BabyEventData {
     _seconds: number;
     _nanoseconds: number;
   };
-  createdAt: { // createdAt も表示するなら型に含める
+  createdAt: {
     _seconds: number;
     _nanoseconds: number;
   };
-  // 他にもFirestoreにあるフィールドがあればここに追加
 }
 
 interface UseBabyEventResult {
@@ -38,7 +36,7 @@ export const useBabyEvent = (): UseBabyEventResult => {
     { status: string; message: string; data: BabyEventData[]; count: number } // Functionsからの出力型
   >(functions, 'fetchBabyEventsFunction');
 
-  const fetchEvent = async (eventName: string, limit: number = 1) => {
+  const fetchEvent = useCallback(async (eventName: string, limit: number = 1) => {
     setLoading(true);
     setError(null);
     try {
@@ -57,7 +55,7 @@ export const useBabyEvent = (): UseBabyEventResult => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return { data, loading, error, fetchEvent };
 };

@@ -1,13 +1,11 @@
-// src/components/BabyEventCard.tsx
-import React, { useEffect } from 'react';
-import { useBabyEvent } from '../hooks/useBabyEvent'; // パスを適宜調整
+import React, { useEffect, useRef } from 'react';
+import { useBabyEvent } from '../hooks/useBabyEvent';
+import { usePredictMilk } from '../hooks/usePredictMilk';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale'; // 日本語ロケール
 
-// アイコンのインポート (例: 母乳は哺乳瓶、おむつはオムツアイコンなど)
-import { /*GiMilkBottle, GiBabyDiaper,*/ GiKidneys } from 'react-icons/gi';
-import { MdAccessTimeFilled, MdEditNote } from 'react-icons/md';
-import { FaCalendarAlt } from 'react-icons/fa';
+import { GiKidneys } from 'react-icons/gi';
+import { MdAccessTimeFilled, MdEditNote, MdSchedule } from 'react-icons/md';
 
 // Firebase TimestampオブジェクトからDateオブジェクトに変換するヘルパー関数
 const convertFirebaseTimestampToDate = (timestamp: { _seconds: number; _nanoseconds: number }): Date => {
@@ -18,15 +16,29 @@ interface BabyEventCardProps {
   title: string;
   eventName: string;
   iconMap: { [key: string]: React.ElementType }; // イベント名とアイコンのマッピング
+  predict?: boolean;
 }
 
-const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap }) => {
-  const { data, loading, error, fetchEvent } = useBabyEvent();
+const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap, predict }) => {
+  // 両方のhookを呼び出し
+  const { data: eventData, loading: eventLoading, error: eventError, fetchEvent } = useBabyEvent();
+  const { data: predictData, loading: predictLoading, error: predictError } = usePredictMilk();
+
+  // データとローディング状態を統合
+  const data = predict ? predictData : eventData;
+  const loading = predict ? predictLoading : eventLoading;
+  const error = predict ? predictError : eventError;
+
+  // 前回のeventNameを記録して、不要な再実行を防ぐ
+  const prevEventNameRef = useRef<string>('');
 
   useEffect(() => {
-    // コンポーネントがマウントされたらデータを取得
-    fetchEvent(eventName, 1); // limitは1を指定
-  }, []);
+    // predictがfalseで、eventNameが変更された場合のみfetchEventを呼び出す
+    if (!predict && prevEventNameRef.current !== eventName) {
+      prevEventNameRef.current = eventName;
+      fetchEvent(eventName, 1); // limitは1を指定
+    }
+  }, [predict, eventName, fetchEvent]);
 
   if (loading) {
     return (
@@ -60,63 +72,76 @@ const BabyEventCard: React.FC<BabyEventCardProps> = ({ title, eventName, iconMap
     );
   }
 
-  // timestampとcreatedAtをDateオブジェクトに変換
-  const timestampDate = data.timestamp ? convertFirebaseTimestampToDate(data.timestamp) : null;
-  const createdAtDate = data.createdAt ? convertFirebaseTimestampToDate(data.createdAt) : null;
+  // データ型に応じて適切なタイムスタンプを取得
+  const timestampDate = !predict && 'timestamp' in data && data.timestamp
+    ? convertFirebaseTimestampToDate(data.timestamp)
+    : null;
+
+  // 予測データの場合は nextFeedingTime を取得
+  const predictedDate = predict && 'nextFeedingTime' in data && data.nextFeedingTime
+    ? convertFirebaseTimestampToDate(data.nextFeedingTime)
+    : null;
 
   // アイコンの選択
   const EventIcon = iconMap[eventName] || GiKidneys; // デフォルトアイコン
-
   return (
-    <div className="bg-white rounded-lg shadow-xl p-6 m-4 w-96 flex flex-col justify-between">
+    <div className="bg-white rounded-lg shadow-xl p-4 m-4 w-96 flex flex-col justify-between">
       <div>
         {/* カードタイトルと主要アイコン */}
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
           <div className="flex items-center">
-            <EventIcon className="text-4xl text-blue-600 mr-3" />
+            <EventIcon className={`text-4xl mr-3 ${predict ? 'text-green-600' : 'text-blue-600'}`} />
             <h2 className="text-2xl font-extrabold text-gray-900">{title}</h2>
           </div>
-          <span className="text-sm font-medium text-blue-500 bg-blue-50 px-3 py-1 rounded-full">最新</span>
+          <span className={`text-sm font-medium px-3 py-1 rounded-full ${predict
+            ? 'text-green-500 bg-green-50'
+            : 'text-blue-500 bg-blue-50'
+            }`}>
+            {predict ? '予測' : '最新'}
+          </span>
         </div>
-
-        {/* イベントタイプ */}
+      </div>
+      {/* ノート */}
+      {'note' in data && data.note && (
         <div className="flex items-center mb-3 text-gray-700">
-          <EventIcon className="text-xl text-gray-500 mr-3" />
-          <span className="font-semibold">イベント:</span>
-          <span className="ml-2 text-lg font-medium text-purple-700">{data.event}</span>
+          <MdEditNote className="text-xl text-gray-500 mr-3 mt-1" />
+          <span className="font-semibold">メモ:</span>
+          <span className="ml-2 flex-grow text-md text-gray-800 leading-relaxed">{data.note}</span>
         </div>
+      )}
 
-        {/* ノート */}
-        {data.note && (
-          <div className="flex items-start mb-3 text-gray-700">
-            <MdEditNote className="text-xl text-gray-500 mr-3 mt-1" />
-            <span className="font-semibold">メモ:</span>
-            <span className="ml-2 flex-grow text-md text-gray-800 leading-relaxed">{data.note}</span>
-          </div>
-        )}
-      </div>
+      {/* 予測データの場合は予測時刻を表示 */}
+      {predict && predictedDate && (
+        <div className="flex items-center mb-3 text-gray-700">
+          <MdSchedule className="text-xl text-green-500 mr-3 mt-1" />
+          <span className="font-semibold">予測時刻:</span>
+          <span className="ml-2 flex-grow text-md text-gray-800 leading-relaxed">
+            {format(predictedDate, 'M月d日 HH:mm', { locale: ja })}
+          </span>
+        </div>
+      )}
 
-      {/* タイムスタンプと作成日時 */}
-      <div className="mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500">
-        {timestampDate && (
-          <div className="flex items-center mb-2">
-            <MdAccessTimeFilled className="text-lg text-gray-400 mr-2" />
-            <span className="font-medium">記録日時:</span>
-            <span className="ml-2 text-gray-700">
-              {format(timestampDate, 'M月d日 HH:mm', { locale: ja })} (JST)
-            </span>
-          </div>
-        )}
-        {createdAtDate && (
-          <div className="flex items-center">
-            <FaCalendarAlt className="text-lg text-gray-400 mr-2" />
-            <span className="font-medium">作成日時:</span>
-            <span className="ml-2 text-gray-700">
-              {format(createdAtDate, 'M月d日 HH:mm:ss', { locale: ja })} (JST)
-            </span>
-          </div>
-        )}
-      </div>
+      {/* 通常データの場合は記録日時を表示 */}
+      {!predict && timestampDate && (
+        <div className="flex items-center mb-3 text-gray-700">
+          <MdAccessTimeFilled className="text-xl text-gray-500 mr-3 mt-1" />
+          <span className="font-semibold">記録日時:</span>
+          <span className="ml-2 flex-grow text-md text-gray-800 leading-relaxed">
+            {format(timestampDate, 'M月d日 HH:mm', { locale: ja })}
+          </span>
+        </div>
+      )}
+
+      {/* 予測データの信頼度表示 */}
+      {predict && 'confidence' in data && data.confidence && (
+        <div className="flex items-center mb-3 text-gray-700">
+          <div className="text-xl text-green-500 mr-3 mt-1">📊</div>
+          <span className="font-semibold">信頼度:</span>
+          <span className="ml-2 flex-grow text-md text-gray-800 leading-relaxed">
+            {Math.round(data.confidence * 100)}%
+          </span>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,5 +18,7 @@ module.exports = [
     },
     rules: {
     },
+    ignores: ['tests/*'],
+
   }),
 ];
