@@ -4,7 +4,7 @@ const react = require('eslint-plugin-react');
 
 module.exports = [
   {
-    ignores: ['.react-router/**'],
+    ignores: ['.react-router/**', '**/tests/*'],
   },
   ...tseslint.config({
     files: ['**/*.{ts,tsx}'],
@@ -26,6 +26,7 @@ module.exports = [
     rules: {
       ...react.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off'
     },
   }),
 ];
