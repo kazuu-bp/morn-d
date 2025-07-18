@@ -153,6 +153,7 @@ const MilkPredictionCard: React.FC<MilkPredictionCardProps> = ({ prediction, loa
             )}
           </span>
         </div>
+        < div className="ml-6 text-sm text-gray-600 mt-1">（平均間隔: {Math.floor(prediction.averageIntervalMins / 60)}時間{prediction.averageIntervalMins - Math.floor(prediction.averageIntervalMins / 60) * 60}分）</div>
 
         {/* 30分以内の場合は残り時間のプログレスバーを表示 */}
         {isNearPrediction && remainingMinutes !== null && (
@@ -220,12 +221,14 @@ const MilkPredictionCard: React.FC<MilkPredictionCardProps> = ({ prediction, loa
       </div>
 
       {/* 信頼度が低い場合の免責事項 */}
-      {prediction.confidence < 0.4 && (
-        <div className="mt-3 p-2 bg-red-50 border border-red-100 rounded-md text-xs text-red-700">
-          <p>※ 予測の信頼度が低いため、実際の授乳時間と異なる可能性があります。より正確な予測のためには、継続的な授乳記録をお願いします。</p>
-        </div>
-      )}
-    </div>
+      {
+        prediction.confidence < 0.4 && (
+          <div className="mt-3 p-2 bg-red-50 border border-red-100 rounded-md text-xs text-red-700">
+            <p>※ 予測の信頼度が低いため、実際の授乳時間と異なる可能性があります。より正確な予測のためには、継続的な授乳記録をお願いします。</p>
+          </div>
+        )
+      }
+    </div >
   );
 };
 

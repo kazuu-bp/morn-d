@@ -88,7 +88,7 @@ export const predictMilkFunction = onCall<PredictMilkRequest>(
       // 授乳間隔の計算
       const intervals = calculateFeedingIntervals(babyEvents);
       const averageInterval = calculateAverageInterval(intervals);
-      logger.info('averageInterval', averageInterval);
+      //logger.info('averageInterval', averageInterval);
 
       if (averageInterval === 0) {
         logger.warn('No valid intervals found for prediction', { userId });
@@ -101,25 +101,25 @@ export const predictMilkFunction = onCall<PredictMilkRequest>(
       // 授乳量の計算
       const quantities = extractAndCalculateQuantities(babyEvents);
       const quantityResult = calculateAverageQuantity(quantities);
-      logger.log('quantityResult', quantityResult);
+      //logger.log('quantityResult', quantityResult);
 
       // 信頼度の計算
       const confidenceResult = calculateConfidence(babyEvents.length, intervals);
-      logger.log('confidenceResult', confidenceResult);
+      //logger.log('confidenceResult', confidenceResult);
 
       // 次回授乳時刻の予測
       const lastFeedingTime = babyEvents[babyEvents.length - 1].timestamp;
-      logger.info('lastFeedingTime', lastFeedingTime);
+      //logger.info('lastFeedingTime', lastFeedingTime);
       const nextFeedingTimeMs = lastFeedingTime._seconds * 1000 + (averageInterval * 60 * 60 * 1000 * 1000);
-      logger.log('nextFeedingTimeMs', nextFeedingTimeMs)
+      //logger.log('nextFeedingTimeMs', nextFeedingTimeMs)
       const nextFeedingTime = Timestamp.fromMillis(nextFeedingTimeMs / 1000);
-      logger.log('nextFeedingTime', nextFeedingTime)
+      //logger.log('nextFeedingTime', nextFeedingTime)
 
       // データ範囲の計算
       const oldestEvent = babyEvents[0];
       const newestEvent = babyEvents[babyEvents.length - 1];
-      logger.log('oldestEvent.timestamp._seconds', oldestEvent.timestamp._seconds / 1000);
-      logger.log('newestEvent.timestamp._seconds', newestEvent.timestamp._seconds / 1000);
+      //logger.log('oldestEvent.timestamp._seconds', oldestEvent.timestamp._seconds / 1000);
+      //logger.log('newestEvent.timestamp._seconds', newestEvent.timestamp._seconds / 1000);
 
       // 6. レスポンスデータの構築
       const predictionData: PredictMilkData = {
@@ -135,7 +135,8 @@ export const predictMilkFunction = onCall<PredictMilkRequest>(
           to: Timestamp.fromMillis(newestEvent.timestamp._seconds),
           eventCount: babyEvents.length
         },
-        isPrediction: true
+        isPrediction: true,
+        averageIntervalMins: averageInterval * 60
       };
 
       logger.info('Prediction calculation completed successfully', {

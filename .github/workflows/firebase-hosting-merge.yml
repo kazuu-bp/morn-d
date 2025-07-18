@@ -90,9 +90,11 @@ jobs:
           # diff -q は差分があれば終了コード1を、なければ0を返す。-qで内容は表示しない。
           if diff -q firestore.indexes.json remote.indexes.json; then
             echo "✅ No changes detected in Firestore indexes. Skipping deployment."
+            echo "should_deploy=false"
             echo "should_deploy=false" >> $GITHUB_OUTPUT
           else
             echo "🔍 Changes detected in Firestore indexes. Proceeding to deploy."
+            echo "should_deploy=true"
             echo "should_deploy=true" >> $GITHUB_OUTPUT
           fi
       
@@ -110,6 +112,6 @@ jobs:
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:rules \
-          --project ${{ env.PROJECT_NAME }} --force --debug
+          --project ${{ env.PROJECT_NAME }}
       
 
