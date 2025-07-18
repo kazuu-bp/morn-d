@@ -136,7 +136,10 @@ export const predictMilkFunction = onCall<PredictMilkRequest>(
           eventCount: babyEvents.length
         },
         isPrediction: true,
-        averageIntervalMins: averageInterval * 60
+        averageInterval: {
+          hours: Math.floor(averageInterval),
+          mins: Math.floor((averageInterval - Math.floor(averageInterval)) * 60)
+        }
       };
 
       logger.info('Prediction calculation completed successfully', {

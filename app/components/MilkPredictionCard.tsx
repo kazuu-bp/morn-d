@@ -153,8 +153,11 @@ const MilkPredictionCard: React.FC<MilkPredictionCardProps> = ({ prediction, loa
             )}
           </span>
         </div>
-        < div className="ml-6 text-sm text-gray-600 mt-1">（平均間隔: {Math.floor(prediction.averageIntervalMins / 60)}時間{prediction.averageIntervalMins - Math.floor(prediction.averageIntervalMins / 60) * 60}分）</div>
-
+        <div className="ml-10 text-sm text-gray-600 mt-1">
+          <span className='font-semibold'>平均間隔: </span>
+          {prediction.averageInterval.hours}時間
+          {prediction.averageInterval.mins}分
+        </div>
         {/* 30分以内の場合は残り時間のプログレスバーを表示 */}
         {isNearPrediction && remainingMinutes !== null && (
           <div className="mt-2 w-full">
