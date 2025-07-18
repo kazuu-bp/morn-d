@@ -26,6 +26,13 @@ jobs:
         if: github.ref == 'refs/heads/main' 
         uses: actions/checkout@v4
 
+      #デフォルトだとv18。firebase cli（firestore:indexesのデプロイ）での挙動が異なっているようなので変更。
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
       - name: Install dependencies
         if: github.ref == 'refs/heads/main' 
         run: npm ci
@@ -33,7 +40,9 @@ jobs:
       
       - name: Install Firebase CLI
         if: github.ref == 'refs/heads/main' 
-        run: npm install -g firebase-tools
+        run: | 
+          npm install -g firebase-tools
+          firebase --version
 
       - name: Authenticate to Google Cloud for Prd
         if: github.ref == 'refs/heads/main' 
@@ -81,12 +90,12 @@ jobs:
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:indexes \
-          --project ${{ env.PROJECT_NAME }} --force --debug
+          --project ${{ env.PROJECT_NAME }}
 
       - name: Deploy Firestore Rules
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:rules \
-          --project ${{ env.PROJECT_NAME }} --force --debug
+          --project ${{ env.PROJECT_NAME }}
       
 
