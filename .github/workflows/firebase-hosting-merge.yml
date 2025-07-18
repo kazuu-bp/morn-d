@@ -26,13 +26,6 @@ jobs:
         if: github.ref == 'refs/heads/main' 
         uses: actions/checkout@v4
 
-      #デフォルトだとv18。firebase cli（firestore:indexesのデプロイ）での挙動が異なっているようなので変更。
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
       - name: Install dependencies
         if: github.ref == 'refs/heads/main' 
         run: npm ci
@@ -86,16 +79,37 @@ jobs:
           --force \
           --project ${{ env.PROJECT_ID }}
 
-      - name: Deploy Firestore Indexes
-        if: github.ref == 'refs/heads/main' 
+      # ▼▼▼ 差分チェックのステップを追加 ▼▼▼
+      - name: Check for Firestore index changes
+        id: check_changes # このステップの結果を後で参照するためのID
         run: |
-          firebase deploy --only firestore:indexes \
-          --project ${{ env.PROJECT_NAME }}
+          # Firebaseから現在のインデックス定義を取得し、一時ファイルに保存
+          firebase firestore:indexes --project prd-morn-d > remote.indexes.json
 
+          # ローカルの定義ファイル(firestore.indexes.json)とリモートの定義(remote.indexes.json)を比較
+          # diff -q は差分があれば終了コード1を、なければ0を返す。-qで内容は表示しない。
+          if diff -q firestore.indexes.json remote.indexes.json; then
+            echo "✅ No changes detected in Firestore indexes. Skipping deployment."
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          else
+            echo "🔍 Changes detected in Firestore indexes. Proceeding to deploy."
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          fi
+      
+      # ▼▼▼ 差分があった場合のみデプロイを実行 ▼▼▼
+      - name: Deploy Firestore indexes if changed
+        # 上のステップ(check_changes)の出力(should_deploy)が'true'の場合のみ実行
+        if: steps.check_changes.outputs.should_deploy == 'true'
+        run: |
+          # --forceは、ローカルでインデックスを削除した場合にリモートに反映させるために付けておく
+          firebase deploy --only firestore:indexes --project ${{ env.PROJECT_NAME }} --force
+      
+      
+      #####
       - name: Deploy Firestore Rules
         if: github.ref == 'refs/heads/main' 
         run: |
           firebase deploy --only firestore:rules \
-          --project ${{ env.PROJECT_NAME }}
+          --project ${{ env.PROJECT_NAME }} --force --debug
       
 
