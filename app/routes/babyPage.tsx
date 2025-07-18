@@ -18,10 +18,10 @@ const BabyPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">赤ちゃんの記録</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Baby Dashboard</h1>
 
       {/* ダッシュボードレイアウト - レスポンシブグリッド */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-4 max-w-[1200px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 max-w-[1200px] mx-auto">
         {/* 予測カード - 最初の位置に配置して強調表示 */}
         <div className="lg:col-span-3 md:col-span-2">
           <MilkPredictionCard
@@ -31,22 +31,28 @@ const BabyPage: React.FC = () => {
           />
         </div>
 
-        {/* 実績カード */}
-        <BabyEventCard
-          title="ミルク"
-          eventName="ミルク"
-          iconMap={ICONMAP}
-        />
-        <BabyEventCard
-          title="母乳"
-          eventName="母乳"
-          iconMap={ICONMAP}
-        />
-        <BabyEventCard
-          title="うんち"
-          eventName="うんち"
-          iconMap={ICONMAP}
-        />
+        {/* 実績カード - 各カードをグリッドセルに収まるようにラップ */}
+        <div className="flex justify-center">
+          <BabyEventCard
+            title="ミルク"
+            eventName="ミルク"
+            iconMap={ICONMAP}
+          />
+        </div>
+        <div className="flex justify-center">
+          <BabyEventCard
+            title="母乳"
+            eventName="母乳"
+            iconMap={ICONMAP}
+          />
+        </div>
+        <div className="flex justify-center">
+          <BabyEventCard
+            title="うんち"
+            eventName="うんち"
+            iconMap={ICONMAP}
+          />
+        </div>
       </div>
     </div>
   );

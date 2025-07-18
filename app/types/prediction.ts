@@ -22,6 +22,7 @@ export interface PredictMilkData {
     eventCount: number;
   };
   isPrediction: true;
+  averageIntervalMins: number;
 }
 
 /**

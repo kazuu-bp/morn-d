@@ -2,7 +2,7 @@
 import { Timestamp } from 'firebase-admin/firestore';
 
 // 予測リクエストの型定義
- 
+
 export interface PredictMilkRequest {
   // 現在時刻ベースで予測するため、入力パラメータは不要
 }
@@ -32,6 +32,7 @@ export interface PredictMilkData {
     eventCount: number;
   };
   isPrediction: true;
+  averageIntervalMins: number;
 }
 
 // エラーレスポンスの型定義
